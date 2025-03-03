@@ -30,7 +30,7 @@ def log_likelihood(agent, data):
 
     return ll_sum
 
-def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10)):
+def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10), theta_range=np.linspace(-1, 1, 10)):
     """
     Perform a grid search over alpha and beta values to find the best-fitting parameters.
 
@@ -38,10 +38,11 @@ def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_rang
         data (pd.DataFrame): DataFrame with columns 'choice' and 'reward'
         alpha_range (np.array): Array of alpha values to search
         beta_range (np.array): Array of beta values to search
+        theta_range (np.array): Array of theta values to search
 
     Returns:
         tuple: (best_params, best_likelihood)
-            best_params (tuple): Best (alpha, beta) pair
+            best_params (tuple): Best (alpha, beta, theta) pair
             best_likelihood (float): Corresponding log-likelihood
     """
     best_params = None
@@ -49,15 +50,16 @@ def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_rang
 
     for alpha in alpha_range:
         for beta in beta_range:
-            agent = ModelBasedRL(alpha=alpha, beta=beta)
-            likelihood = log_likelihood(agent, data)
-            if likelihood > best_likelihood:
-                best_likelihood = likelihood
-                best_params = (alpha, beta)
+            for theta in theta_range: 
+                agent = ModelBasedRL(alpha=alpha, beta=beta, theta=theta)
+                likelihood = log_likelihood(agent, data)
+                if likelihood > best_likelihood:
+                    best_likelihood = likelihood
+                    best_params = (alpha, beta, theta)
 
     return best_params, best_likelihood
 
-def simulate_data_for_fitting(trials=100, alpha=0.1, beta=5, gamma=0.9):
+def simulate_data_for_fitting(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
     """
     Generate synthetic data using a model with known parameters.
     Args:
@@ -69,7 +71,7 @@ def simulate_data_for_fitting(trials=100, alpha=0.1, beta=5, gamma=0.9):
     Returns:
         pd.DataFrame: DataFrame with columns 'choice' and 'reward'
     """
-    model = ModelBasedRL(alpha, beta, gamma)
+    model = ModelBasedRL(alpha, beta, gamma, theta)
     data = []
     for t in range(trials):
         state = 0

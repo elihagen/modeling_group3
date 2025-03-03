@@ -16,18 +16,25 @@ def load_data():
 
     df = pd.json_normalize(data)
     
+    
     print("Response pattern: ", df["response"])
     return df
     
     
     
 def processing_data(df): 
-    print(df.columns)
     
     # Rename columns for consistency
     df.rename(columns=lambda x: x.replace("bean_", ""), inplace=True)
 
     #filter out instructions, by removing any rows from df where the column 'bandits' has NaN
     df = df.dropna(subset=['bandits'])
-    
-    print(df)
+    # drop rows containing NaN and first row containing "q" to start experiment
+    df = df[~df['response'].astype(str).str.contains(r'\bq\b', na=False)]
+    df = df[df['response'].astype(str).str.strip() != '']
+    df = df.dropna(subset=['response'])
+    # print(df["response"])
+    df['response'] = pd.to_numeric(df['response'])
+        
+    print("dataframe", df)
+    return df
