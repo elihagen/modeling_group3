@@ -24,7 +24,7 @@ def log_likelihood(agent, data):
 
         action_probs = agent.get_action_probabilities(state)
         chosen_action_prob = action_probs[chosen_action]
-        agent.update_q_table(state, chosen_action, received_reward, True)
+        agent.update_q_table(state, chosen_action, received_reward)
 
         ll_sum += np.log(chosen_action_prob)
 
@@ -78,6 +78,6 @@ def simulate_data_for_fitting(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.
         action_probs = model.get_action_probabilities(state)
         action = np.random.choice([0, 1], p=action_probs)
         reward = np.random.choice([0, 1], p=[0.3, 0.7]) if action == 0 else np.random.choice([0, 1], p=[0.7, 0.3])
-        model.update_q_table(state, action, reward, True)
+        model.update_q_table(state, action, reward)
         data.append({'choice': action, 'reward': reward})
     return pd.DataFrame(data)
