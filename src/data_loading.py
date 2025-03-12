@@ -9,16 +9,27 @@ def load_data():
 
     # Get the filename from the uploaded dictionary
     file_name = list(uploaded.keys())[0]
+    df_list = []
 
-    # Open and load the JSON file
-    with open(file_name, "r") as f:
-        data = json.load(f)
+    for file_name in uploaded.keys():
+        with open(file_name, "r") as f:
+            data = json.load(f)
 
-    df = pd.json_normalize(data)
-    
-    
-    print("Response pattern: ", df["response"])
-    return df
+
+    # # Open and load the JSON file
+    # with open(file_name, "r") as f:
+    #     data = json.load(f)
+
+    # Normalize JSON structure into a Pandas DataFrame
+        df = pd.json_normalize(data)
+
+        # Append processed DataFrame to the list
+        df_list.append(df)
+
+    # Concatenate all DataFrames into a single DataFrame
+    final_df = pd.concat(df_list, ignore_index=True)
+
+    return final_df
     
     
     

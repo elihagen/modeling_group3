@@ -27,11 +27,12 @@ def plot_reward_over_time(df):
     
     
 def switch_win_loss(df): 
-    df['prev_choice'] = df['response'].shift(1)
+    df = df.dropna(axis=1, how='all') 
     df = df.loc[:, ~df.columns.duplicated()]
+    df['prev_choice'] = df['response'].shift(1)
     df['prev_reward'] = df['value'].shift(1)
 
-    df['switch'] = (df['value'] != df['prev_choice']).astype(int)
+    df['switch'] = (df['response'] != df['prev_choice']).astype(int)
 
     # Switch rate after win:
     switch_after_win = df.loc[df['prev_reward']==1, 'switch'].mean()
