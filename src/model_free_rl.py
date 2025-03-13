@@ -10,20 +10,16 @@ def softmax(q_values, beta):
     return exp_q / np.sum(exp_q)
 
 
-class TemporalDifferenceLearning:
-    def __init__(self, alpha=0.5, beta=5, gamma=0.9, theta=0.2):
+class ModelFreeRL:
+    def __init__(self, alpha=0.1, beta=5, theta = 0.2, gamma=0.9, epsilon=0.2, explore=False):
 
         self.alpha = alpha # Learning rate of stage 1
         self.beta = beta    # Inverse temperature for softmax
         self.gamma = gamma  # Discount factor
         self.theta = theta  # Choice perseveration
-        self.q_table = np.zeros((2, 2))
+        self.epsilon = epsilon # Exploration probability
+        self.explore = explore
         self.prev_choice = None # Needed for choice perservation
-        self.transition_probs = {
-            0: (0.5, 0.5),
-            1: (0.5, 0.5)
-        }
-
         # Fixed probabilities for actions
         self.reward_probs = [0.2, 0.8]  
 
@@ -40,18 +36,25 @@ class TemporalDifferenceLearning:
     #     return np.random.choice(len(self.q_table), p=reward_probs)
     
     def choose_action(self):
-        """ Select an action based on predefined probabilities, incorporating choice perseveration """
+        """ Select an action based on predefined probabilities, incorporating choice perseveration and exploration """
         probs = self.reward_probs.copy()
-        
+   
         # Apply choice perseveration
         if self.prev_choice is not None:
             probs[self.prev_choice] += self.theta
 
-        # Ensure probabilities remain valid
-        probs = np.maximum(probs, 0)  # Ensure no negative values
-        probs /= np.sum(probs)  # Normalize to sum to 1
         
-        return np.random.choice(len(self.q_table), p=probs)
+        if np.random.rand() < self.epsilon:
+            return np.random.randint(2) 
+        else:
+            if self.prev_choice is not None:
+                probs[self.prev_choice] += self.theta
+
+            # Ensure probabilities remain valid
+            probs = np.maximum(probs, 0)  # Ensure no negative values
+            probs /= np.sum(probs)  # Normalize to sum to 1
+            
+            return np.random.choice(len(self.q_table), p=probs)
 
     
     def update(self, choice, reward):
@@ -59,7 +62,6 @@ class TemporalDifferenceLearning:
 
         delta = reward - self.q_table[choice]
         self.q_table[choice] += self.alpha * delta
-
 
         self.prev_choice = choice
 
