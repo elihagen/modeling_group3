@@ -22,18 +22,9 @@ class ModelFreeRL:
         self.prev_choice = None # Needed for choice perservation
         # Fixed probabilities for actions
         self.reward_probs = [0.2, 0.8]  
+        self.q_table = np.zeros((2,2))
 
-    # def choose_action(self):
 
-    #     reward_probs = self.reward_probs
-
-    #     # Apply choice perseveration
-    #     if self.prev_choice is not None:
-    #         reward_probs[self.prev_choice] += self.theta
-    #         reward_probs = np.clip(reward_probs, 0, 1) # Make sure they are not out of the range
-    #         reward_probs /= np.sum(reward_probs)  # Normalize probabilities
-
-    #     return np.random.choice(len(self.q_table), p=reward_probs)
     
     def choose_action(self):
         """ Select an action based on predefined probabilities, incorporating choice perseveration and exploration """
@@ -42,7 +33,6 @@ class ModelFreeRL:
         # Apply choice perseveration
         if self.prev_choice is not None:
             probs[self.prev_choice] += self.theta
-
         
         if np.random.rand() < self.epsilon:
             return np.random.randint(2) 
@@ -92,7 +82,7 @@ def simulate_participant_TD(n_trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.
         rewards (list): Sequence of rewards received
     """
    
-    model = TemporalDifferenceLearning()
+    model = ModelFreeRL()
     n_trials = 100
     choices = []
     rewards = []
@@ -115,8 +105,7 @@ def plot_simulated_behavior_TD(choices, rewards):
 
     trials = np.arange(len(choices))
     colors = ['blue' if choice == 0 else 'red' for choice in choices]
-    
-    print(colors)
+
     plt.figure(figsize=(10, 5))
      
      # Scatter plot where the reward is 0 or 1, colored by choice
