@@ -115,14 +115,14 @@ def log_likelihood_mf(agent, data):
         # Get action probabilities using softmax
         action_probs = softmax(agent.q_table, agent.beta)
         chosen_action_prob = action_probs[chosen_action]
-
+        # chosen_action_prob = max(chosen_action_prob, 1e-8)
         # Update the agent
         agent.update(chosen_action, received_reward)
 
         # Accumulate log-likelihood
         ll_sum += np.log(chosen_action_prob)
 
-    return ll_sum
+    return ll_sum[0]
 
 def grid_search_parameter_fit_mf(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10), theta_range=np.linspace(-1, 1, 10)):
     """
@@ -148,7 +148,6 @@ def grid_search_parameter_fit_mf(data, alpha_range=np.linspace(0, 1, 10), beta_r
             for theta in theta_range:
                 agent = ModelFreeRL(alpha=alpha, beta=beta, theta=theta)
                 likelihood = log_likelihood_mf(agent, data)
-                print(likelihood, best_likelihood)
                 if likelihood > best_likelihood:
                     best_likelihood = likelihood
                     best_params = (alpha, beta, theta)
