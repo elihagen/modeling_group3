@@ -59,7 +59,7 @@ class ModelBasedRL:
         action = np.random.choice([0, 1], p=action_probs)
         return action
 
-    def update_q_table(self, state, action, reward):
+    def update_q_table(self, state = 0, action = 0, reward = 0):
         """
         Update the Q-value for the given state and action using the RPE.
 
@@ -105,10 +105,8 @@ def simulate_participant(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
         prob_s1, prob_s2 = model.transition_probs[action]
         outcome_state = np.random.choice([1, 2], p=[prob_s1, prob_s2])
 
-        if outcome_state == 1:
-            reward = np.random.choice([0, 1], p=[0.2, 0.8])
-        else:
-            reward = np.random.choice([0, 1], p=[0.8, 0.2])
+        reward_probs = {0: 0.8, 1: 0.2}  # Bandit 0 is the "better" option most of the time
+        reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]])
         rewards.append(reward)
 
         model.update_q_table(state=state, action=action, reward=reward)
