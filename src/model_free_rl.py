@@ -48,7 +48,7 @@ class ModelFreeRL:
         # Ensure probabilities remain valid
         #action_probs = np.maximum(action_probs, 0)  # Ensure no negative values
 
-        action_probs /= np.sum(action_probs)  # Normalize to sum to 1
+        #action_probs /= np.sum(action_probs)  # Normalize to sum to 1
         
         return np.random.choice([0, 1], p=action_probs)
 
