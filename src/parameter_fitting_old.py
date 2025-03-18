@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
 from model_based_rl import ModelBasedRL
-from model_free_rl import ModelFreeRL
+from model_free_rl import ModelFreeRL, softmax
 
 def log_likelihood(agent, data):
     """
@@ -19,8 +19,9 @@ def log_likelihood(agent, data):
     """
     ll_sum = 0
     for idx, trial_data in data.iterrows():
-        chosen_action = trial_data['choice']
+        chosen_action = int(trial_data['choice'])
         state = 0
+        #print(trial_data["reward"])
         received_reward = int(trial_data['reward'])
 
         action_probs = agent.get_action_probabilities(state)
@@ -89,7 +90,7 @@ def simulate_mfrl_trials(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
     
     for _ in range(trials):
         action = agent.choose_action()
-        reward = np.random.choice([0, 1], p=[0.3, 0.7]) if action == 0 else np.random.choice([0, 1], p=[0.7, 0.3])#([0, 1], p=[0.3, 0.7] if action == 0 else [0.7, 0.3])
+        reward = np.random.choice([0, 1], p=[0.3, 0.7] if action == 0 else [0.7, 0.3])
         agent.update(action, reward)
         data.append({'choice': action, 'reward': reward})
     
@@ -109,20 +110,20 @@ def log_likelihood_mf(agent, data):
     """
     ll_sum = 0
     for _, trial_data in data.iterrows():
-        chosen_action = trial_data['choice']
+        chosen_action = int(trial_data['choice'])
         received_reward = int(trial_data['reward'])
 
         # Get action probabilities using softmax
-        action_probs = agent.get_action_probabilities()
+        action_probs = softmax(agent.q_table, agent.beta)
         chosen_action_prob = action_probs[chosen_action]
-
+        # chosen_action_prob = max(chosen_action_prob, 1e-8)
         # Update the agent
         agent.update(chosen_action, received_reward)
 
         # Accumulate log-likelihood
         ll_sum += np.log(chosen_action_prob)
 
-    return ll_sum
+    return ll_sum[0]
 
 def grid_search_parameter_fit_mf(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10), theta_range=np.linspace(-1, 1, 10)):
     """
@@ -148,7 +149,6 @@ def grid_search_parameter_fit_mf(data, alpha_range=np.linspace(0, 1, 10), beta_r
             for theta in theta_range:
                 agent = ModelFreeRL(alpha=alpha, beta=beta, theta=theta)
                 likelihood = log_likelihood_mf(agent, data)
-               
                 if likelihood > best_likelihood:
                     best_likelihood = likelihood
                     best_params = (alpha, beta, theta)

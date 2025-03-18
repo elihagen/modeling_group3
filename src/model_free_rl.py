@@ -1,73 +1,73 @@
-# Code written with the help of ChatGPT and some functions are from model_based_rl.py
+# Code written with the help of ChatGPT, ClaudeAI, and some functions are adjusted from model_based_rl.py
+# Code written by the group members assigned to model free learning
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def softmax(q_values, beta):
-    """ Compute action probabilities using softmax """
-    exp_q = np.exp(beta * q_values)
-    return exp_q / np.sum(exp_q)
-
-
 class ModelFreeRL:
-    def __init__(self, alpha=0.1, beta=5, theta = 0.2, gamma=0.9, epsilon=0.2, explore=False):
+    def __init__(self, alpha=0.1, beta=5, theta = 0.2, gamma=0.9, epsilon=0.2):
 
         self.alpha = alpha # Learning rate of stage 1
         self.beta = beta    # Inverse temperature for softmax
         self.gamma = gamma  # Discount factor
         self.theta = theta  # Choice perseveration
         self.epsilon = epsilon # Exploration probability
-        self.explore = explore
-        self.prev_choice = None # Needed for choice perservation
-        # Fixed probabilities for actions
-        self.reward_probs = [0.2, 0.8]  
-        self.q_table = np.zeros((2,2))
+        self.explore = False
+        self.prev_action = None # Needed for choice perservation
+        self.action_history = []
+        self.reward_history = []
+        self.q_value_history = []
 
+        # Fixed probabilities for actions
+        self.reward_probs = [0.3, 0.7]  
+        self.q_table = np.zeros(2)
+
+    def get_action_probabilities(self):
+
+        q_values = self.q_table.copy()
+        if self.prev_action is not None and self.theta != 0:
+            q_values[self.prev_action] += self.theta
+        
+        """ Calculate action probabilities using softmax function """
+        exp_values = np.exp(self.beta * q_values)
+
+        return exp_values / np.sum(exp_values)
 
     
     def choose_action(self):
-        """ Select an action based on predefined probabilities, incorporating choice perseveration and exploration """
-        probs = self.reward_probs.copy()
-   
-        # Apply choice perseveration
-        if self.prev_choice is not None:
-            probs[self.prev_choice] += self.theta
-        
-        if np.random.rand() < self.epsilon:
-            return np.random.randint(2) 
-        else:
-            if self.prev_choice is not None:
-                probs[self.prev_choice] += self.theta
+        """ Select an action based on predefined probabilities with including exploration """
 
-            # Ensure probabilities remain valid
-            probs = np.maximum(probs, 0)  # Ensure no negative values
-            probs /= np.sum(probs)  # Normalize to sum to 1
+        # If the exploration is True and the random number is smaller than the exploration factor, we get a random action.
+        if self.epsilon is not None and np.random.rand() < self.epsilon:
+            action = np.random.randint(2)
+            return action
             
-            return np.random.choice(len(self.q_table), p=probs)
+        action_probs = self.get_action_probabilities()
+
+        # Ensure probabilities remain valid
+        #action_probs = np.maximum(action_probs, 0)  # Ensure no negative values
+
+        action_probs /= np.sum(action_probs)  # Normalize to sum to 1
+        
+        return np.random.choice([0, 1], p=action_probs)
 
     
-    def update(self, choice, reward):
+    def update(self, action, reward):
         """ Update the values using TD learning """
 
-        delta = reward - self.q_table[choice]
-        self.q_table[choice] += self.alpha * delta
 
-        self.prev_choice = choice
+        self.action_history.append(action)
+        self.reward_history.append(reward)
+        self.q_value_history.append(self.q_table.copy())
+
+        rpe = reward - self.q_table[action]
+        self.q_table[action] += self.alpha * rpe
+
+        self.prev_action = action
 
 
-    def simulate_trial(self):
-        """ Simulate one trial """
-        choice = self.choose_action()
-        
-        
-        reward = np.random.choice([0, 1], p = [1 - self.reward_probs[choice], self.reward_probs[choice]])  # Random binary reward with the probabilities assigned
-        
-        self.update(choice, reward)
-        
-        return choice, reward
-
-def simulate_participant_TD(n_trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
+def simulate_participant_TD(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2, epsilon=None, reward_probs=[0.3, 0.7]):
     """
     Simulate participants decisions in the two-armed bandit task
     Args:
@@ -78,37 +78,43 @@ def simulate_participant_TD(n_trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.
         theta (float): Choice preservation
 
     Returns:
-        choices (list): Sequence of chosen actions
+        actions (list): Sequence of chosen actions
         rewards (list): Sequence of rewards received
     """
    
-    model = ModelFreeRL()
-    n_trials = 100
-    choices = []
+    model = ModelFreeRL(alpha, beta, gamma, theta, epsilon)
     rewards = []
- 
-    for t in range(n_trials):
-        choice, reward = model.simulate_trial()
-        choices.append(choice)
-        rewards.append(reward)
+    actions = []
 
-    return choices, rewards
+ 
+    for t in range(trials):
+        action = model.choose_action()
+        actions.append(action)
+        print(action)
+
+        reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]]) 
+        rewards.append(reward)
+  
+
+        model.update(action, reward)
+
+    return actions, rewards, model
     
-def plot_simulated_behavior_TD(choices, rewards):
+def plot_simulated_behavior_TD(actions, rewards):
     """
     Plots reward outcomes (0 or 1) and colors them based on chosen action.
     
     Args:
-        choices (list): Sequence of chosen actions (0 or 1)
+        actions (list): Sequence of chosen actions (0 or 1)
         rewards (list): Sequence of rewards received (0 or 1)
     """
 
-    trials = np.arange(len(choices))
-    colors = ['blue' if choice == 0 else 'red' for choice in choices]
+    trials = np.arange(len(actions))
+    colors = ['blue' if action == 0 else 'red' for action in actions]
 
     plt.figure(figsize=(10, 5))
      
-     # Scatter plot where the reward is 0 or 1, colored by choice
+     # Scatter plot where the reward is 0 or 1, colored by action
     plt.scatter(trials, rewards, c=colors, edgecolors='black', marker='o', s=100, alpha=0.75)
     
     plt.xlabel('Trial')
