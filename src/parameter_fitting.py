@@ -19,7 +19,7 @@ def log_likelihood(agent, data):
     """
     ll_sum = 0
     for idx, trial_data in data.iterrows():
-        chosen_action = trial_data['choice']
+        chosen_action = int(trial_data['choice'])
         state = 0
         received_reward = int(trial_data['reward'])
 
@@ -109,7 +109,7 @@ def log_likelihood_mf(agent, data):
     """
     ll_sum = 0
     for _, trial_data in data.iterrows():
-        chosen_action = trial_data['choice']
+        chosen_action = int(trial_data['choice'])
         received_reward = int(trial_data['reward'])
 
         # Get action probabilities using softmax

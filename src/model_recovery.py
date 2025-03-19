@@ -11,7 +11,8 @@ import numpy as np
 import pandas as pd
 from model_based_rl import ModelBasedRL
 from model_free_rl import ModelFreeRL
-from parameter_fitting import grid_search_parameter_fit, grid_search_parameter_fit_mf
+from parameter_fitting import *
+
 
 #Model Recovery#
 
