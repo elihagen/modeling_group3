@@ -85,7 +85,7 @@ def plot_param_recovery(true_params, recovered_params):
     axes[1].set_title('Beta Parameter Recovery')
     
     axes[2].scatter(true_params['theta'], recovered_params['theta'], alpha=0.7)
-    axes[2].plot([0, 10], [0, 10], linestyle='--', color='red')
+    axes[2].plot([0, 10], [0, 1], linestyle='--', color='red')
     axes[2].set_xlabel('True theta')
     axes[2].set_ylabel('Recovered theta')
     axes[2].set_title('theta Parameter Recovery')

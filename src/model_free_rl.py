@@ -90,7 +90,7 @@ def simulate_participant_TD(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2,
     for t in range(trials):
         action = model.choose_action()
         actions.append(action)
-        print(action)
+        #print(action)
 
         reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]]) 
         rewards.append(reward)

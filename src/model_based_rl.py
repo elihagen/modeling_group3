@@ -105,7 +105,7 @@ def simulate_participant(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
         prob_s1, prob_s2 = model.transition_probs[action]
         outcome_state = np.random.choice([1, 2], p=[prob_s1, prob_s2])
 
-        reward_probs = {0: 0.8, 1: 0.2}  # Bandit 0 is the "better" option most of the time
+        reward_probs = {0: 0.7, 1: 0.3}  # Bandit 0 is the "better" option most of the time
         reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]])
         rewards.append(reward)
 
