@@ -50,6 +50,7 @@ def model_recovery_experiment(num_simulations=100, trials_per_sim=100):
     """
     true_models = []
     recovered_models = []
+    confusion_matrix = np.zeros((2,2))
 
     for _ in range(num_simulations):
         true_model_type = np.random.choice(["model_free", "model_based"])
@@ -59,11 +60,84 @@ def model_recovery_experiment(num_simulations=100, trials_per_sim=100):
         true_models.append(true_model)
         recovered_models.append(recovered_model)
 
+        confusion_matrix[0, 0] += 1 if true_model and recovered_model == "model_based" else 0
+        confusion_matrix[0, 1] += 1 if true_model == "model_based" and recovered_model == "model_free" else 0
+        confusion_matrix[1, 0] += 1 if true_model and recovered_model == "model_free" else 0
+        confusion_matrix[1, 1] += 1 if true_model == "model_free" and recovered_model == "model_free" else 0
+
     accuracy = np.mean(np.array(true_models) == np.array(recovered_models))
     print(f"Model recovery accuracy: {accuracy * 100:.2f}%")
 
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(confusion_matrix, annot=True, cmap="Blues", fmt=".2f",
+                xticklabels=["Fit Model-Based", "Fit Model-Free"],
+                yticklabels=["Simulated Model-Based ", "Simulated Model-Free"])
+    plt.xlabel("Predicted Model")
+    plt.ylabel("Simulated Model")
+    plt.title("Confusion matrix: p(Fit Model | Simulated Model)")
+    plt.show()
+
     return pd.DataFrame({"True Model": true_models, "Recovered Model": recovered_models})
 
+#def model_recovery_experiment(num_simulations=2, trials_per_sim=100):
+
+    """
+    Running simulations for each model to fit both models to the simulated data. 
+    It assesses the model recoveries and plots a confusion matrix of 
+    """
+    true_models = []
+    recovered_models = []
+    confusion_matrix = np.zeros((2,2))
+
+    for i in range(num_simulations):
+        
+       # Simulating for model_based 
+        true_model_type = "model_based"
+        data, true_model = simulate_data_for_model_recovery(true_model_type, trials_per_sim)
+        recovered_model = recover_model(data)
+
+        
+        # Add the recovered models the confusion matrix
+        confusion_matrix[0, 0] += 1 if true_model and recovered_model == "model_based" else 0
+        confusion_matrix[0, 1] += 1 if true_model == "model_based" and recovered_model == "model_free" else 0
+        confusion_matrix[1, 0] += 0#1 if true_model_type and recovered_model == "model_free" else 0
+        confusion_matrix[1, 1] += 0#1 if true_model_type == "model_free" and recovered_model == "model_free" else 0
+
+
+        true_models.append(true_model)
+        recovered_models.append(recovered_models)
+
+        
+    for i in range(num_simulations):
+        # Simulating for model_free 
+        true_model_type = "model_free"
+        data, true_model = simulate_data_for_model_recovery(true_model_type, trials_per_sim)
+        recovered_model = recover_model(data)
+
+        confusion_matrix[0, 0] += 0# if true_model_type and recovered_model == "model_based" else 0
+        confusion_matrix[0, 1] += 0# if true_model_type == "model_based" and recovered_model == "model_free" else 0
+        confusion_matrix[1, 0] += 1 if true_model and recovered_model == "model_free" else 0
+        confusion_matrix[1, 1] += 1 if true_model == "model_free" and recovered_model == "model_free" else 0
+
+        true_models.append(true_model)
+        recovered_models.append(recovered_models)
+
+    confusion_matrix = confusion_matrix / num_simulations
+
+    accuracy = np.mean(np.array(true_models) == np.array(recovered_models))
+    print(f"Model recovery accuracy: {accuracy * 100:.2f}%")
+   # print(confusion_matrix)
+
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(confusion_matrix, annot=True, cmap="Blues", fmt=".2f",
+                xticklabels=["Fit Model A", "Fit Model B"],
+                yticklabels=["Simulated Model A", "Simulated Model B"])
+    plt.xlabel("Predicted Model")
+    plt.ylabel("Simulated Model")
+    plt.title("Confusion matrix: p(Fit Model | Simulated Model)")
+    plt.show()
+
+    #return pd.DataFrame({"True Model": true_models, "Recovered Model": recovered_models}), confusion_matrix
 # Run model recovery experiment
 if __name__ == "__main__":
     results = model_recovery_experiment()
