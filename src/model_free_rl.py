@@ -6,15 +6,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class ModelFreeRL:
-    def __init__(self, alpha=0.1, beta=5, theta = 0.2, gamma=0.9, epsilon=0.2):
+    def __init__(self, alpha=0.1, beta=5, theta = 0.2, epsilon=0.2):
+        """
+        Initializes the model-free reinforcement learning agent.
 
-        self.alpha = alpha # Learning rate of stage 1
-        self.beta = beta    # Inverse temperature for softmax
-        self.gamma = gamma  # Discount factor
-        self.theta = theta  # Choice perseveration
-        self.epsilon = epsilon # Exploration probability
+        Args:
+            alpha (float): Learning rate.
+            beta (float): Inverse temperature for softmax decision rule.
+            theta (float): Choice perseveration parameter (bias toward repeating previous actions).
+            epsilon (float): Probability of exploration (random action).
+        """
+        self.alpha = alpha 
+        self.beta = beta   
+        self.theta = theta  
+        self.epsilon = epsilon
         self.explore = False
-        self.prev_action = None # Needed for choice perservation
+        self.prev_action = None   # Keeps track of last action for choice perseveration
         self.action_history = []
         self.reward_history = []
         self.q_value_history = []
@@ -24,39 +31,45 @@ class ModelFreeRL:
         self.q_table = np.zeros(2)
 
     def get_action_probabilities(self):
-
+        """ 
+        Calculate action probabilities using softmax function 
+        Returns: 
+            np.ndarray: Probability of choosing each action.
+        """
         q_values = self.q_table.copy()
         if self.prev_action is not None and self.theta != 0:
             q_values[self.prev_action] += self.theta
-        
-        """ Calculate action probabilities using softmax function """
+    
         exp_values = np.exp(self.beta * q_values)
 
         return exp_values / np.sum(exp_values)
 
     
     def choose_action(self):
-        """ Select an action based on predefined probabilities with including exploration """
+        """ Chooses an action based on softmax probabilities with epsilon-greedy exploration.
 
+        Returns:
+            int: Selected action (0 or 1).
+        """
         # If the exploration is True and the random number is smaller than the exploration factor, we get a random action.
         if self.epsilon is not None and np.random.rand() < self.epsilon:
             action = np.random.randint(2)
             return action
-            
-        action_probs = self.get_action_probabilities()
-
-        # Ensure probabilities remain valid
-        #action_probs = np.maximum(action_probs, 0)  # Ensure no negative values
-
-        #action_probs /= np.sum(action_probs)  # Normalize to sum to 1
         
+        # Otherwise, choose action based on softmax probabilities 
+        action_probs = self.get_action_probabilities() + 1e-7
+
         return np.random.choice([0, 1], p=action_probs)
 
     
     def update(self, action, reward):
-        """ Update the values using TD learning """
+        """
+        Updates Q-values based on the received reward using Temporal Difference (TD) learning.
 
-
+        Args:
+            action (int): Action taken.
+            reward (int): Reward received (0 or 1).
+        """
         self.action_history.append(action)
         self.reward_history.append(reward)
         self.q_value_history.append(self.q_table.copy())
@@ -67,14 +80,13 @@ class ModelFreeRL:
         self.prev_action = action
 
 
-def simulate_participant_TD(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2, epsilon=None, reward_probs=[0.3, 0.7]):
+def simulate_participant_TD(trials=100, alpha=0.1, beta=5, theta=-1.2, epsilon=None, reward_probs=[0.3, 0.7]):
     """
     Simulate participants decisions in the two-armed bandit task
     Args:
         trials (int): Number of trials to simulate
         alpha (float): Learning rate for the agent
         beta (float): Inverse temperature for softmax action selection
-        gamma (float): Discount factor
         theta (float): Choice preservation
 
     Returns:
@@ -82,7 +94,7 @@ def simulate_participant_TD(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2,
         rewards (list): Sequence of rewards received
     """
    
-    model = ModelFreeRL(alpha, beta, gamma, theta, epsilon)
+    model = ModelFreeRL(alpha, beta, theta, epsilon)
     rewards = []
     actions = []
 
@@ -90,8 +102,6 @@ def simulate_participant_TD(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2,
     for t in range(trials):
         action = model.choose_action()
         actions.append(action)
-        print(action)
-
         reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]]) 
         rewards.append(reward)
   

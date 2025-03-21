@@ -42,7 +42,7 @@ class ModelBasedRL:
             q_values[self.prev_choice] += self.theta 
 
         # softmax prob for action selection 
-        exp_values = np.exp(self.beta * q_values)
+        exp_values = np.exp(self.beta * q_values) + 1e-7
         # normlize
         return exp_values / np.sum(exp_values)
 
@@ -102,11 +102,7 @@ def simulate_participant(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
         state = 0
         action = model.policy(state=0)
         choices.append(action)
-        prob_s1, prob_s2 = model.transition_probs[action]
-        outcome_state = np.random.choice([1, 2], p=[prob_s1, prob_s2])
-
-        reward_probs = {0: 0.8, 1: 0.2}  # Bandit 0 is the "better" option most of the time
-        reward = np.random.choice([0, 1], p=[1 - reward_probs[action], reward_probs[action]])
+        reward = np.random.choice([0, 1], p=[0.3, 0.7]) if action == 0 else np.random.choice([0, 1], p=[0.7, 0.3])
         rewards.append(reward)
 
         model.update_q_table(state=state, action=action, reward=reward)

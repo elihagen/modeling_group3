@@ -10,11 +10,29 @@ import matplotlib.pyplot as ptl
 def calculate_bic(num_params, num_data_points, ll):
     """
     Calculate Bayesian Information Criterion (BIC).
+     Args:
+        num_params (int): Number of parameters in the model.
+        num_data_points (int): Number of data points (e.g., trials).
+        ll (float): Log-likelihood of the fitted model.
+    Returns:
+        float: The BIC value.
     """
     return num_params * np.log(num_data_points) - 2 * ll
 
 
 def run_model_comparison(num_participants):
+    """
+    Runs a model comparison between Model-Free and Model-Based reinforcement learning models.
+    - Loads and preprocesses behavioral data.
+    - Fits both Model-Free and Model-Based RL models using grid search.
+    - Compares models based on log-likelihood and Bayesian Information Criterion (BIC).
+    - Simulates behavior using the best-fitting model.
+    - Visualizes model predictions vs. actual choices.
+
+    Args:
+        num_participants (str): 'merged' for aggregated data or 'single' for individual participant data.
+    """
+       
     # Load and preprocess the experimental data from our experiment 
     data = load_data(num_participants)
     data = processing_data(data)
@@ -31,7 +49,7 @@ def run_model_comparison(num_participants):
 
     # Fit Model-Based RL
     best_params_mb, best_likelihood_mb = grid_search_parameter_fit(data)
-    model_based = ModelBasedRL(alpha=best_params_mb[0], beta=best_params_mb[1], theta=best_params_mb[2])
+    model_based = ModelBasedRL(alpha=best_params_mb[0], beta=best_params_mb[1], gamma=best_params_mb[2], theta=best_params_mb[3])
 
     # Fit Model-Free RL
     best_params_mf, best_likelihood_mf = grid_search_parameter_fit_mf(data)
@@ -65,7 +83,7 @@ def run_model_comparison(num_participants):
         
     # Number of parameters in each model
     n_params_mf = 3  # Alpha, Beta, Theta
-    n_params_mb = 3  # Alpha, Beta, Theta
+    n_params_mb = 3  # Alpha, Beta, Gamma, Theta
 
     bic_mf = calculate_bic(n_params_mf, len(data), best_likelihood_mf)
     bic_mb = calculate_bic(n_params_mb, len(data), best_likelihood_mb)

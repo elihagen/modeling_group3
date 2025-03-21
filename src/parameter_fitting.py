@@ -31,7 +31,7 @@ def log_likelihood(agent, data):
 
     return ll_sum
 
-def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10), theta_range=np.linspace(-1, 1, 10)):
+def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_range=np.linspace(0.1, 10, 10), gamma_range=np.linspace(0.1, 10, 10), theta_range=np.linspace(-1, 1, 10)):
     """
     Perform a grid search over alpha and beta values to find the best-fitting parameters.
 
@@ -39,6 +39,7 @@ def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_rang
         data (pd.DataFrame): DataFrame with columns 'choice' and 'reward'
         alpha_range (np.array): Array of alpha values to search
         beta_range (np.array): Array of beta values to search
+        gamma_range (np.array): Array of gamma values to search
         theta_range (np.array): Array of theta values to search
 
     Returns:
@@ -50,13 +51,14 @@ def grid_search_parameter_fit(data, alpha_range=np.linspace(0, 1, 10), beta_rang
     best_likelihood = float('-inf')
 
     for alpha in alpha_range:
-        for beta in beta_range:
-            for theta in theta_range: 
-                agent = ModelBasedRL(alpha=alpha, beta=beta, theta=theta)
-                likelihood = log_likelihood(agent, data)
-                if likelihood > best_likelihood:
-                    best_likelihood = likelihood
-                    best_params = (alpha, beta, theta)
+        for beta in beta_range:#
+            for gamma in gamma_range:
+                for theta in theta_range: 
+                    agent = ModelBasedRL(alpha=alpha, beta=beta, gamma=gamma, theta=theta)
+                    likelihood = log_likelihood(agent, data)
+                    if likelihood > best_likelihood:
+                        best_likelihood = likelihood
+                        best_params = (alpha, beta, gamma, theta)
 
     return best_params, best_likelihood
 
@@ -83,8 +85,8 @@ def simulate_data_for_fitting(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.
         data.append({'choice': action, 'reward': reward})
     return pd.DataFrame(data)
 
-def simulate_mfrl_trials(trials=100, alpha=0.1, beta=5, gamma=0.9, theta=0.2):
-    agent = ModelFreeRL(alpha, beta, theta, gamma)
+def simulate_mfrl_trials(trials=100, alpha=0.1, beta=5, theta=0.2):
+    agent = ModelFreeRL(alpha, beta, theta)
     data = []
     
     for _ in range(trials):

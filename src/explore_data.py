@@ -4,7 +4,12 @@ import matplotlib.pyplot as plt
 from model_based_rl import *
 
 def plot_choices_over_time(df):
+    """
+    Plots the mean choice proportion across trials.
 
+    Args:
+        df (pd.DataFrame): DataFrame containing a 'response' and 'trial_index' column.
+    """
     choice_props = df.groupby('trial_index')['response'].mean()
 
     plt.plot(choice_props.index, choice_props.values, marker='o')
@@ -15,6 +20,12 @@ def plot_choices_over_time(df):
     
 
 def plot_reward_over_time(df): 
+    """
+    Plots the average reward over time.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing a 'value' and 'trial_index' column.
+    """
     df['block'] = df['trial_index'] #// 10  # do we want to plot averaged reward?
 
     reward_rate = df.groupby('block')['value'].mean()
@@ -27,6 +38,12 @@ def plot_reward_over_time(df):
     
     
 def switch_win_loss(df): 
+    """
+    Analyzes switch behavior after receiving a win or a loss.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing 'response' and 'value' columns.
+    """
     df = df.dropna(axis=1, how='all') 
     df = df.loc[:, ~df.columns.duplicated()]
     df['prev_choice'] = df['response'].shift(1)
@@ -43,7 +60,12 @@ def switch_win_loss(df):
     print("Switch after Loss:", switch_after_loss)
     
 def plot_rt(df): 
-    # plot the response time as histogram 
+    """
+    Plots a histogram of participants' reaction times.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing 'rt' (reaction time) column.
+    """
     plt.hist(df['rt'], bins=30)
     plt.xlabel('Reaction Time (ms)')
     plt.ylabel('Frequency')
@@ -79,10 +101,20 @@ def analyze_choice_perseveration(choices, rewards):
             stay_after_win (int): Count of stays following a win
     """
     switch_after_loss = 0
+    total_loss_trials = 0
     stay_after_win = 0
+    total_win_trials = 0
     for i in range(1, len(choices)):
-        if rewards[i-1] == 0 and choices[i] != choices[i-1]:
-            switch_after_loss += 1
-        if rewards[i-1] == 1 and choices[i] == choices[i-1]:
-            stay_after_win += 1
-    return switch_after_loss, stay_after_win
+        if rewards[i - 1] == 0:
+            total_loss_trials += 1
+            if choices[i] != choices[i - 1]:
+                switch_after_loss += 1
+        elif rewards[i - 1] == 1:
+            total_win_trials += 1
+            if choices[i] == choices[i - 1]:
+                stay_after_win += 1
+    
+    switch_pct = (switch_after_loss / total_loss_trials) * 100 if total_loss_trials > 0 else 0
+    stay_pct = (stay_after_win / total_win_trials) * 100 if total_win_trials > 0 else 0
+
+    return switch_pct, stay_pct
