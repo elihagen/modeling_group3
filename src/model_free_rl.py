@@ -1,6 +1,3 @@
-# Code written with the help of ChatGPT, ClaudeAI, and some functions are adjusted from model_based_rl.py
-# Code written by the group members assigned to model free learning
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -74,8 +71,9 @@ class ModelFreeRL:
         self.reward_history.append(reward)
         self.q_value_history.append(self.q_table.copy())
 
-        rpe = reward - self.q_table[action]
+        rpe = reward -  self.q_table[action]
         self.q_table[action] += self.alpha * rpe
+        
 
         self.prev_action = action
 

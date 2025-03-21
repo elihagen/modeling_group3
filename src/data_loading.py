@@ -34,7 +34,7 @@ def load_data(num_participants):
     """
     # Upload the file manually
     # uploaded = files.upload()
-    folder_path = "C:\Arbeitsordner\Semester3\modeling_group3\data"
+    folder_path = "/Users/pelinkomurluoglu/Desktop/safeSafeProject/modeling_group3/data"#"C:\Arbeitsordner\Semester3\modeling_group3\data"
 
     # Get the filename from the uploaded dictionary
     # file_name = list(uploaded.keys())[0]
