@@ -54,7 +54,7 @@ class ModelFreeRL:
             return action
         
         # Otherwise, choose action based on softmax probabilities 
-        action_probs = self.get_action_probabilities() + 1e-7
+        action_probs = self.get_action_probabilities() 
 
         return np.random.choice([0, 1], p=action_probs)
 

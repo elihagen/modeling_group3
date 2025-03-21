@@ -121,7 +121,6 @@ def plot_simulated_behavior(choices, rewards):
 
     # Define colors based on the chosen action (e.g., 0 = blue, 1 = red)
     colors = ['blue' if choice == 0 else 'red' for choice in choices]
-    print(colors)
     plt.figure(figsize=(10, 5))
     
     # Scatter plot where the reward is 0 or 1, colored by choice

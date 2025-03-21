@@ -22,8 +22,8 @@ def parameter_recovery(num_samples=20):
     true_params = {
         'alpha': np.random.uniform(0, 1, num_samples),
         'beta': np.random.uniform(0.1, 10, num_samples), 
-        'gamma': np.random.uniform(0, 5, num_samples),
-        'theta': np.random.uniform(0.1, 1.0, num_samples) 
+        'gamma': np.random.uniform(0.1, 0.99, num_samples),
+        'theta': np.random.uniform(-0.5, 0.5, num_samples) 
     }
     recovered_params = {'alpha': [], 'beta': [], 'gamma': [], 'theta': []}
 
@@ -95,17 +95,17 @@ def plot_param_recovery(true_params, recovered_params):
     axes[1].set_title('Beta Parameter Recovery')
     
     axes[2].scatter(true_params['gamma'], recovered_params['gamma'], alpha=0.7)
-    axes[2].plot([0, 5], [0, 5], linestyle='--', color='red')
+    axes[2].plot([0, 1], [0, 1], linestyle='--', color='red')
     axes[2].set_xlabel('True gamma')
     axes[2].set_ylabel('Recovered gamma')
     axes[2].set_title('Gamma Parameter Recovery')
     
     axes[3].scatter(true_params['theta'], recovered_params['theta'], alpha=0.7)
-    axes[3].plot([0, 1], [0, 1], linestyle='--', color='red')
+    axes[3].plot([-0.5, 0.5], [-0.5, 0.5], linestyle='--', color='red')
     axes[3].set_xlabel('True theta')
     axes[3].set_ylabel('Recovered theta')
     axes[3].set_title('Theta Parameter Recovery')
-
+    plt.tight_layout()
     plt.show()
 
 def parameter_recovery_mfrl(num_samples=20):
@@ -123,8 +123,8 @@ def parameter_recovery_mfrl(num_samples=20):
     """
     true_params = {
         'alpha': np.random.uniform(0, 1, num_samples),
-        'beta': np.random.uniform(0.1, 10, num_samples),
-        'theta': np.random.uniform(0, 1, num_samples)
+        'beta': np.random.uniform(0.1, 5, num_samples),
+        'theta': np.random.uniform(-0.5, 0.5, num_samples)
     }
     recovered_params = {'alpha': [], 'beta': [], 'theta': []}
 
@@ -180,13 +180,13 @@ def plot_param_recovery_mfrl(true_params, recovered_params):
     axes[0].set_title('Alpha Parameter Recovery')
 
     axes[1].scatter(true_params['beta'], recovered_params['beta'], alpha=0.7)
-    axes[1].plot([0, 10], [0, 10], linestyle='--', color='red')
+    axes[1].plot([0, 5], [0, 5], linestyle='--', color='red')
     axes[1].set_xlabel('True Beta')
     axes[1].set_ylabel('Recovered Beta')
     axes[1].set_title('Beta Parameter Recovery')
     
     axes[2].scatter(true_params['theta'], recovered_params['theta'], alpha=0.7)
-    axes[2].plot([0, 1], [0, 1], linestyle='--', color='red')
+    axes[2].plot([-0.5, 0.5], [-0.5, 0.5], linestyle='--', color='red')
     axes[2].set_xlabel('True Theta')
     axes[2].set_ylabel('Recovered Theta')
     axes[2].set_title('Theta Parameter Recovery')
