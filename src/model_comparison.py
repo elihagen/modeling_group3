@@ -73,7 +73,7 @@ def run_model_comparison(num_participants):
     choices, rewards = [], []
     for _ in range(len(data)):
         choice = best_model.choose_action() if isinstance(best_model, ModelFreeRL) else best_model.policy(state=0)
-        reward = np.random.choice([0, 1], p=[0.3, 0.7] if choice == 0 else [0.7, 0.3])
+        reward = np.random.choice([0, 1], p=[0.7, 0.3] if choice == 0 else [0.3, 0.7])
         try: 
             best_model.update(choice, reward)
         except: 
@@ -83,7 +83,7 @@ def run_model_comparison(num_participants):
         
     # Number of parameters in each model
     n_params_mf = 3  # Alpha, Beta, Theta
-    n_params_mb = 3  # Alpha, Beta, Gamma, Theta
+    n_params_mb = 4  # Alpha, Beta, Gamma, Theta
 
     bic_mf = calculate_bic(n_params_mf, len(data), best_likelihood_mf)
     bic_mb = calculate_bic(n_params_mb, len(data), best_likelihood_mb)
