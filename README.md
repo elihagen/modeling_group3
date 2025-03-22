@@ -6,6 +6,7 @@ This project explores the differences between **model-based** and **model-free**
 ---
 
 ## Project Structure
+```bash
 ├── Group3_Experiment_1.ipynb # Main notebook (run everything from here) 
 └── src/
     ├── data_loading.py # Loads participant data from .json files 
@@ -17,13 +18,14 @@ This project explores the differences between **model-based** and **model-free**
     ├── model_comparison.py # Log-likelihood and BIC comparison 
     ├── model_recovery.py # Model identity recovery 
 └── data/ # Folder for .json data files
+```
 
-##Install dependencies:
+## Install dependencies:
 ```bash
 pip install numpy pandas matplotlib seaborn scipy tqdm
 ```
 
-##How to Use: 
+## How to Use: 
 # Local
 1. Place all .py files and .json data files in the same folder.
 2. Edit the file path in data_loading.py:
